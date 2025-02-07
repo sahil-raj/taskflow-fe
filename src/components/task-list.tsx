@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Task, ApiTaskResponse } from "@/app/types/task";
 import { TaskItem } from "./task-item";
-import { Input, Textarea, Button, Stack, Skeleton } from "@chakra-ui/react";
+import {
+  Input,
+  Textarea,
+  Button,
+  Stack,
+  Skeleton,
+  Spinner,
+} from "@chakra-ui/react";
 import { FaPlusCircle } from "react-icons/fa";
 import axios from "axios";
 
@@ -18,7 +25,7 @@ export function TaskList() {
       setLoading(true); // Set loading to true when fetching starts
       try {
         const response = await axios.get(
-          "https://taskflow-6z22.onrender.com/api/tasks/user_id/2"
+          "https://taskflow-6z22.onrender.com/api/tasks/user_id/1"
         );
 
         // Map the response to match Task interface
@@ -73,6 +80,9 @@ export function TaskList() {
 
         setNewTaskName("");
         setNewTaskDescription("");
+
+        // Alert for task addition
+        alert("Task added successfully!");
       } catch (error) {
         console.error("Error adding task:", error);
         alert("Error adding task!");
@@ -177,26 +187,31 @@ export function TaskList() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <Spinner size="xl" color="white" />
+        </div>
+      )}
+
       <div className="space-y-3">
         <Input
           placeholder="Task name..."
           value={newTaskName}
           onChange={(e) => setNewTaskName(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="w-full"
-          borderColor="white" // White border color
-          _focus={{ borderColor: "white" }} // Focus border color with _focus prop
+          className="w-full border-white !border-2 !focus:border-white"
         />
         <Textarea
           placeholder="Task description... (optional)"
           value={newTaskDescription}
           onChange={(e) => setNewTaskDescription(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="min-h-[80px]"
-          borderColor="white" // White border color
-          _focus={{ borderColor: "white" }} // Focus border color with _focus prop
+          className="min-h-[80px] border-white !border-2 !focus:border-white"
         />
-        <Button onClick={addTask} className="w-full">
+        <Button
+          onClick={addTask}
+          className="w-full !border-white !focus:border-white"
+        >
           <FaPlusCircle className="h-4 w-4 mr-2" />
           Add Task
         </Button>

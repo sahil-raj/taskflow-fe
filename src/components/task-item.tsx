@@ -32,12 +32,12 @@ export function TaskItem({
   };
 
   return (
-    <div className="p-4 bg-card rounded-lg border group">
+    <div className="p-4 bg-black text-white border-2 rounded-lg group">
       <div className="flex items-center gap-3">
         <Checkbox
           checked={task.completed}
           onCheckedChange={() => onToggle(task.id)}
-          className="h-5 w-5"
+          className="h-5 w-5 border-2 border-yellow-400 rounded-md cursor-pointer"
         />
 
         {isEditing ? (
@@ -46,14 +46,16 @@ export function TaskItem({
               value={editedName}
               onChange={(e) => setEditedName(e.target.value)}
               placeholder="Task name"
-              className="flex-1"
+              className="flex-1 border-white !border-2 !focus:border-white"
               autoFocus
+              color="gray.100"
             />
             <Textarea
               value={editedDescription}
               onChange={(e) => setEditedDescription(e.target.value)}
               placeholder="Task description"
-              className="min-h-[80px]"
+              className="min-h-[80px] border-white !border-2 !focus:border-white"
+              color="gray.100"
             />
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="ghost" onClick={handleCancel}>
@@ -71,25 +73,25 @@ export function TaskItem({
             <div className="flex items-center justify-between">
               <h3
                 className={`font-medium ${
-                  task.completed ? "line-through text-muted-foreground" : ""
+                  task.completed ? "line-through text-yellow-400" : "text-white"
                 }`}
               >
                 {task.name}
               </h3>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex gap-2">
                 <Button
                   size="md"
                   variant="ghost"
                   onClick={() => setIsEditing(true)}
                 >
-                  <FaPencil className="h-4 w-4" />
+                  <FaPencil className="h-4 w-4 text-yellow-400" />
                 </Button>
                 <Button
                   size="md"
                   variant="ghost"
                   onClick={() => onDelete(task.id)}
                 >
-                  <FaTrash className="h-4 w-4" />
+                  <FaTrash className="h-4 w-4 text-yellow-400" />
                 </Button>
               </div>
             </div>
@@ -97,8 +99,8 @@ export function TaskItem({
               <p
                 className={`mt-1 text-sm ${
                   task.completed
-                    ? "line-through text-muted-foreground"
-                    : "text-muted-foreground"
+                    ? "line-through text-yellow-400"
+                    : "text-gray-400"
                 }`}
               >
                 {task.description}

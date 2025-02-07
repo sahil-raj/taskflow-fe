@@ -94,3 +94,14 @@
     height: 0;
   }
 }
+
+.funky-heading {
+  font-family: cursive, sans-serif; /* Keeping cursive for that funky vibe */
+  font-weight: 600; /* Slightly less bold for balance */
+  font-size: 2.5rem; /* A bit smaller for a cleaner look */
+  text-transform: capitalize; /* Capitalizes only the first letter for readability */
+  letter-spacing: 3px; /* Slightly spread out, but not too much */
+  color: #e74c3c; /* A vibrant yet classy color */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3), 0 0 5px rgba(255, 255, 255, 0.5); /* Lighter shadow with a glow effect */
+  transform: rotate(-3deg); /* Gentle rotation for the funky feel */
+}
