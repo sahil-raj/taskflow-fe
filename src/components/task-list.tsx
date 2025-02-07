@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { Task } from "@/app/types/task";
 import { TaskItem } from "./task-item";
-import { Input, Textarea, Button, Skeleton, Stack } from "@chakra-ui/react";
+import {
+  Input,
+  Textarea,
+  Button,
+  Stack,
+  Skeleton,
+  Spinner,
+  Checkbox,
+} from "@chakra-ui/react";
 import { FaPlusCircle } from "react-icons/fa";
 import axios from "axios";
 
@@ -9,7 +17,9 @@ export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); // Loading state for fetching tasks
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null); // ID of the task being deleted
+  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null); // ID of the task being updated
 
   // Fetch tasks from API when component mounts
   useEffect(() => {
@@ -40,41 +50,136 @@ export function TaskList() {
     fetchTasks();
   }, []);
 
-  const addTask = () => {
+  const addTask = async () => {
     if (newTaskName.trim()) {
-      const newTask: Task = {
-        id: crypto.randomUUID(),
-        name: newTaskName,
-        description: newTaskDescription,
-        completed: false,
-        createdAt: new Date(),
+      const newTaskData = {
+        task_name: newTaskName,
+        user_id: 2, // You can replace with the actual user ID dynamically if needed
+        task_desc: newTaskDescription,
+        status: false, // Initially false (not completed)
       };
-      setTasks([...tasks, newTask]);
-      setNewTaskName("");
-      setNewTaskDescription("");
+
+      try {
+        // Send POST request to the API
+        const response = await axios.post(
+          "https://taskflow-6z22.onrender.com/api/tasks/",
+          newTaskData
+        );
+
+        // After successful addition, update the state with the new task
+        setTasks([
+          ...tasks,
+          {
+            id: response.data.id, // Assuming the response contains the newly added task's ID
+            name: newTaskName,
+            description: newTaskDescription,
+            completed: false, // Newly added task is not completed
+            createdAt: new Date(),
+          },
+        ]);
+
+        setNewTaskName("");
+        setNewTaskDescription("");
+      } catch (error) {
+        console.error("Error adding task:", error);
+        alert("Error adding task!");
+      }
     }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const deleteTask = async (id: string) => {
+    setDeletingTaskId(id); // Set the task ID that is being deleted
+    try {
+      const response = await axios.delete(
+        `https://taskflow-6z22.onrender.com/api/tasks/id/${id}`
+      );
+      if (response.status === 200) {
+        setTasks(tasks.filter((task) => task.id !== id));
+        alert("Task deleted successfully!");
+      } else {
+        console.error("Failed to delete task");
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      alert("Error deleting task!");
+    } finally {
+      setDeletingTaskId(null); // Reset the deleting task ID
+    }
   };
 
-  const updateTask = (id: string, newName: string, newDescription: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id
-          ? { ...task, name: newName, description: newDescription }
-          : task
-      )
-    );
+  const updateTask = async (
+    id: string,
+    newName: string,
+    newDescription: string
+  ) => {
+    setUpdatingTaskId(id); // Set task ID as updating
+    const updatedTaskData = {
+      task_name: newName,
+      user_id: 2, // Replace with dynamic user ID if necessary
+      task_desc: newDescription,
+      status: false, // Keeping it false for now, you can modify this for dynamic status
+    };
+
+    try {
+      const response = await axios.put(
+        `https://taskflow-6z22.onrender.com/api/tasks/id/${id}`,
+        updatedTaskData
+      );
+
+      if (response.status === 200) {
+        setTasks(
+          tasks.map((task) =>
+            task.id === id
+              ? { ...task, name: newName, description: newDescription }
+              : task
+          )
+        );
+        alert("Task updated successfully!");
+      } else {
+        console.error("Failed to update task");
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      alert("Error updating task!");
+    } finally {
+      setUpdatingTaskId(null); // Reset the updating task ID
+    }
   };
 
-  const toggleTask = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const toggleTask = async (id: string) => {
+    setUpdatingTaskId(id); // Set task ID as updating
+    const taskToUpdate = tasks.find((task) => task.id === id);
+    if (taskToUpdate) {
+      const updatedTaskData = {
+        task_name: taskToUpdate.name,
+        user_id: 2,
+        task_desc: taskToUpdate.description,
+        status: !taskToUpdate.completed,
+      };
+
+      try {
+        const response = await axios.put(
+          `https://taskflow-6z22.onrender.com/api/tasks/id/${id}`,
+          updatedTaskData
+        );
+
+        if (response.status === 200) {
+          setTasks(
+            tasks.map((task) =>
+              task.id === id ? { ...task, completed: !task.completed } : task
+            )
+          );
+          alert("Task status updated successfully!");
+        } else {
+          console.error("Failed to update task status");
+        }
+      } catch (error) {
+        console.error("Error updating task status:", error);
+        alert("Error updating task status!");
+      } finally {
+        setUpdatingTaskId(null); // Reset the updating task ID
+      }
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -130,6 +235,7 @@ export function TaskList() {
               onDelete={deleteTask}
               onUpdate={updateTask}
               onToggle={toggleTask}
+              isUpdating={updatingTaskId === task.id} // Check if this task is being updated
             />
           ))
         )}
