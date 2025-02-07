@@ -58,13 +58,13 @@
     --chart-5: 340 75% 55%;
   }
 
-  * {
+  /* * {
     @apply border-border;
-  }
+  } */
 
-  body {
+  /* body {
     @apply bg-background text-foreground;
-  }
+  } */
 }
 
 @layer components {
