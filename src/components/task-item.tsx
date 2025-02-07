@@ -1,19 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Task } from "@/app/types/task";
 import { Button } from "@chakra-ui/react";
 import { Input } from "@chakra-ui/react";
 import { Textarea } from "@chakra-ui/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaPencil, FaTrash, FaCheck, FaX } from "react-icons/fa6";
-
-interface TaskItemProps {
-  task: Task;
-  onDelete: (id: string) => void;
-  onUpdate: (id: string, newName: string, newDescription: string) => void;
-  onToggle: (id: string) => void;
-}
+import { TaskItemProps } from "@/app/types/taskItemProps";
 
 export function TaskItem({
   task,
@@ -85,14 +78,14 @@ export function TaskItem({
               </h3>
               <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
-                  size="icon"
+                  size="md"
                   variant="ghost"
                   onClick={() => setIsEditing(true)}
                 >
                   <FaPencil className="h-4 w-4" />
                 </Button>
                 <Button
-                  size="icon"
+                  size="md"
                   variant="ghost"
                   onClick={() => onDelete(task.id)}
                 >

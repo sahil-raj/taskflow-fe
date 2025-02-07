@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
-import { Task } from "@/app/types/task";
+import { Task, ApiTaskResponse } from "@/app/types/task";
 import { TaskItem } from "./task-item";
-import {
-  Input,
-  Textarea,
-  Button,
-  Stack,
-  Skeleton,
-  Spinner,
-  Checkbox,
-} from "@chakra-ui/react";
+import { Input, Textarea, Button, Stack, Skeleton } from "@chakra-ui/react";
 import { FaPlusCircle } from "react-icons/fa";
 import axios from "axios";
 
@@ -18,7 +10,6 @@ export function TaskList() {
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for fetching tasks
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null); // ID of the task being deleted
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null); // ID of the task being updated
 
   // Fetch tasks from API when component mounts
@@ -31,13 +22,15 @@ export function TaskList() {
         );
 
         // Map the response to match Task interface
-        const fetchedTasks: Task[] = response.data.map((task: any) => ({
-          id: task.id,
-          name: task.task_name,
-          description: task.task_desc,
-          completed: task.status,
-          createdAt: new Date(task.created_at),
-        }));
+        const fetchedTasks: Task[] = response.data.map(
+          (task: ApiTaskResponse) => ({
+            id: task.id,
+            name: task.task_name,
+            description: task.task_desc,
+            completed: task.status,
+            createdAt: new Date(task.created_at),
+          })
+        );
 
         setTasks(fetchedTasks);
       } catch (error) {
@@ -88,22 +81,15 @@ export function TaskList() {
   };
 
   const deleteTask = async (id: string) => {
-    setDeletingTaskId(id); // Set the task ID that is being deleted
     try {
-      const response = await axios.delete(
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+      await axios.delete(
         `https://taskflow-6z22.onrender.com/api/tasks/id/${id}`
       );
-      if (response.status === 200) {
-        setTasks(tasks.filter((task) => task.id !== id));
-        alert("Task deleted successfully!");
-      } else {
-        console.error("Failed to delete task");
-      }
+      alert("Task deleted successfully!");
     } catch (error) {
       console.error("Error deleting task:", error);
       alert("Error deleting task!");
-    } finally {
-      setDeletingTaskId(null); // Reset the deleting task ID
     }
   };
 
@@ -199,7 +185,7 @@ export function TaskList() {
           onKeyPress={handleKeyPress}
           className="w-full"
           borderColor="white" // White border color
-          focusBorderColor="white" // White border color when focused
+          _focus={{ borderColor: "white" }} // Focus border color with _focus prop
         />
         <Textarea
           placeholder="Task description... (optional)"
@@ -208,7 +194,7 @@ export function TaskList() {
           onKeyPress={handleKeyPress}
           className="min-h-[80px]"
           borderColor="white" // White border color
-          focusBorderColor="white" // White border color when focused
+          _focus={{ borderColor: "white" }} // Focus border color with _focus prop
         />
         <Button onClick={addTask} className="w-full">
           <FaPlusCircle className="h-4 w-4 mr-2" />
@@ -218,7 +204,7 @@ export function TaskList() {
 
       <div className="space-y-3">
         {loading ? (
-          <Stack spacing={4}>
+          <Stack>
             <Skeleton height="40px" />
             <Skeleton height="40px" />
             <Skeleton height="40px" />
